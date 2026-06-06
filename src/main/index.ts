@@ -1,32 +1,33 @@
-import type { Reactive, Ref } from 'vue';
-
 import type {
 	SelectorMap,
 	Data,
 	Changes
 } from '..';
 
+import {
+	EagleEyeContext,
+	createEagleEye
+} from '@webkrafters/eagleeye';
+
 import { onUnmounted, reactive } from 'vue';
 
 import {
 	AutoImmutable,
 	BaseStream,
-	Channel as BaseChannel,
-	createEagleEye,
-	EagleEyeContext,
+	BaseChannel,
 	IStorage,
 	Prehooks,
 	State
-} from "@webkrafters/eagleeye";
+} from '..';
 
 export class Channel<
 	T extends State, 
 	const S extends SelectorMap
 > {
 	private _channel : BaseChannel<T, S>;
-	private _data = reactive({}) as Reactive<Data<S, T>>;
+	private _data = reactive({}) as Data<S, T>;
 	constructor( stream : BaseStream<T>, selectorMap : S ) {
-		this._channel = stream( selectorMap );
+		this._channel = stream( selectorMap ) as BaseChannel<T, S>;
 		const observe = () => this.updateData();
 		this._channel.addListener( 'data-changed', observe );
 		onUnmounted(() => {
