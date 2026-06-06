@@ -24,8 +24,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          
+      - run: rm -rf package-lock.json node_modules
+      - run: npm cache clean --force
       - run: npm install --legacy-peer-deps
-      - run: npm install --save-dev vue
+      
       - run: npm run test:core -- --coverage
 
       - uses: coverallsapp/github-action@master
