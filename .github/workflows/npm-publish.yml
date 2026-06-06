@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
+      - run: rm -rf package-lock.json
+      - run: cache clean --force
       - run: npm install --legacy-peer-deps
       - run: npm run build
       - run: npm publish --tag beta --access public
