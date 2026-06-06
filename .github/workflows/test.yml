@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install --legacy-peer-deps
+      - run: npm install --save-dev vue
       - run: npm run test:core -- --coverage
 
       - uses: coverallsapp/github-action@master
