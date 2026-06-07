@@ -1,7 +1,8 @@
 import { Reactive } from 'vue';
 
-import {
+import type {
     Data as BaseData,
+    IStore,
     SelectorMap,
     State
 } from '@webkrafters/eagleeye';
@@ -10,6 +11,14 @@ export type Data<
     S extends SelectorMap = SelectorMap,
     T extends State = State
 > = Reactive<BaseData<S, T>>;
+
+export interface Store<
+    T extends State = State,
+    S extends SelectorMap = SelectorMap
+> extends IStore<T> {
+    get data() : Data<S, T>
+    set selectorMap( selectorMap : S );
+}
 
 export type {
     Immutable as AutoImmutable,
@@ -33,13 +42,12 @@ export type {
     Changes,
     FullStateSelector,
     IStorage,
-    IStore,
     Listener,
     ObjectSelector,
     Prehooks,
     ProviderProps,
-    Store,
     StoreInternal,
+    Store as BaseStore,
     StoreRef,
     Stream as BaseStream,
     Text,
@@ -62,6 +70,7 @@ export {
 
 export type {
     BaseData,
+    IStore,
     SelectorMap,
     State
 };

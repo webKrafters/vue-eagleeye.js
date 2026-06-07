@@ -17,6 +17,7 @@ import {
 	BaseChannel,
 	IStorage,
 	Prehooks,
+	Store,
 	State
 } from '..';
 
@@ -26,24 +27,32 @@ export class Channel<
 > {
 	private _channel : BaseChannel<T, S>;
 	private _data = reactive({}) as Data<S, T>;
+	private _store : Store<T,S>;
 	constructor( stream : BaseStream<T>, selectorMap : S ) {
 		this._channel = stream( selectorMap ) as BaseChannel<T, S>;
-		const sync = () => this.updateData();
+		const sync = this.updateData.bind( this );
 		this._channel.addListener( 'data-changed', sync );
 		onBeforeUnmount(() => {
 			this._channel.removeListener( 'data-changed', sync );
 			this._channel.endStream();
 		});
-	 	sync();
+		this._store = ( $ => {
+			return {
+				get data() { return $._data },
+				set selectorMap( selectorMap : S ) {
+					$._channel.selectorMap = selectorMap;
+				},
+				resetState: $._resetState.bind( $ ),
+				setState: $._setState.bind( $ )
+			};
+		})( this );
+		sync();
 	}
-	get data() { return this._data }
-	set selectorMap( selectorMap : S ) {
-		this._channel.selectorMap = selectorMap;
-	}
-	resetState( propertyPaths?: string[] ) {
+	get store() { return this._store }
+	private _resetState( propertyPaths?: string[] ) {
 		this._channel.resetState( propertyPaths );
 	}
-	setState( changes : Changes<T> ) {
+	private _setState( changes : Changes<T> ) {
 		this._channel.setState( changes );
 	}
 	private updateData() {
@@ -125,7 +134,7 @@ export class VueEagleEye<T extends State> {
 	get stream() {
 		const stream = this.consumer.stream;
 		return <const S extends SelectorMap>( selectorMap? : S ) => (
-			new Channel<T, S>( stream, selectorMap )
+			new Channel<T, S>( stream, selectorMap ).store
 		);
 	}
 
