@@ -5,10 +5,7 @@ module.exports = {
 		'jest/globals': true,
 		node: true
 	},
-	extends: [
-		'plugin:react/recommended',
-		'standard'
-	],
+	extends: [ 'standard' ],
 	parserOptions: {
 		ecmaFeatures: {
 			jsx: true
@@ -16,7 +13,7 @@ module.exports = {
 		ecmaVersion: 13,
 		sourceType: 'module'
 	},
-	plugins: [ 'jest', 'react' ],
+	plugins: [ 'jest' ],
 	rules: {
 		'array-bracket-spacing': 0,
 		'computed-property-spacing': [ 'error', 'always' ],

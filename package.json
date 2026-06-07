@@ -16,6 +16,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/lodash.isempty": "^4.4.9",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/node": "^20.11.28",
@@ -112,7 +113,7 @@
     "test:watch": "eslint --fix && jest --updateSnapshot --watchAll"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "dependencies": {
     "@webkrafters/eagleeye": "^1.0.8"
   }

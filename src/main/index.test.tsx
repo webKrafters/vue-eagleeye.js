@@ -9,11 +9,12 @@ import {
 	IStorage,
 	Prehooks,
 	SelectorMap,
-	State
+	State,
+	Store
 } from '../';
 
 import createSourceData, { SourceData } from '../test-artifacts/data/create-state-obj';
-import { Channel, VueEagleEye } from '.';
+import { VueEagleEye } from '.';
 
 describe( 'Context', () => {
 	let getDefState : () => SourceData;
@@ -132,7 +133,7 @@ describe( 'Context', () => {
 		});
 	});
 	describe( 'stream(...)', () => {
-		test( 'returns a local Channel instance for streaming', () => {
+		test( 'returns a dedicated store for streaming', () => {
 			const value = createSourceData();
 			const selectorMap = {
 				fName: 'name.first',
@@ -142,39 +143,37 @@ describe( 'Context', () => {
 			const propertyPaths = Object.values( selectorMap );
 			mountDriver( value, selectorMap )(({
 				context: ctx,
-				streamChannel: channel
+				streamChannel: store
 			}) => {
-				expect( channel ).toBeInstanceOf( Channel );
-
 				let currStateVals = ctx.store.getState( propertyPaths );
-				expect( channel.data.fName ).toEqual( value.name.first );
-				expect( channel.data.fName ).toEqual( currStateVals.name.first );
-				expect( channel.data.company ).toEqual( value.company );
-				expect( channel.data.company ).toEqual( currStateVals.company );
-				expect( channel.data.bff_fname ).toEqual( value.friends[ 0 ].name.first );
-				expect( channel.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
+				expect( store.data.fName ).toEqual( value.name.first );
+				expect( store.data.fName ).toEqual( currStateVals.name.first );
+				expect( store.data.company ).toEqual( value.company );
+				expect( store.data.company ).toEqual( currStateVals.company );
+				expect( store.data.bff_fname ).toEqual( value.friends[ 0 ].name.first );
+				expect( store.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
 				
-				channel.setState({
+				store.setState({
 					company: 'TESTING_COMPANY',
 					friends: { 0: { name: { first : 'TESTING_BFF_NAME' } } },
 					name: { first: 'MY_TESTING_NAME' }
 				} as unknown as  SourceData );
 				currStateVals = ctx.store.getState( propertyPaths );
-				expect( channel.data.fName ).not.toEqual( value.name.first );
-				expect( channel.data.fName ).toEqual( currStateVals.name.first );
-				expect( channel.data.company ).not.toEqual( value.company );
-				expect( channel.data.company ).toEqual( currStateVals.company );
-				expect( channel.data.bff_fname ).not.toEqual( value.friends[ 0 ].name.first );
-				expect( channel.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
+				expect( store.data.fName ).not.toEqual( value.name.first );
+				expect( store.data.fName ).toEqual( currStateVals.name.first );
+				expect( store.data.company ).not.toEqual( value.company );
+				expect( store.data.company ).toEqual( currStateVals.company );
+				expect( store.data.bff_fname ).not.toEqual( value.friends[ 0 ].name.first );
+				expect( store.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
 
-				channel.resetState();
+				store.resetState();
 				currStateVals = ctx.store.getState( propertyPaths );
-				expect( channel.data.fName ).toEqual( value.name.first );
-				expect( channel.data.fName ).toEqual( currStateVals.name.first );
-				expect( channel.data.company ).toEqual( value.company );
-				expect( channel.data.company ).toEqual( currStateVals.company );
-				expect( channel.data.bff_fname ).toEqual( value.friends[ 0 ].name.first );
-				expect( channel.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
+				expect( store.data.fName ).toEqual( value.name.first );
+				expect( store.data.fName ).toEqual( currStateVals.name.first );
+				expect( store.data.company ).toEqual( value.company );
+				expect( store.data.company ).toEqual( currStateVals.company );
+				expect( store.data.bff_fname ).toEqual( value.friends[ 0 ].name.first );
+				expect( store.data.bff_fname ).toEqual( currStateVals.friends[ 0 ].name.first );
 			});
 		} );
 		describe( 'using the stream(...)', () => {
@@ -187,9 +186,9 @@ describe( 'Context', () => {
 			const sourceData = createSourceData();
 			test( 'accepts object based selectorMap', () => {
 				mountDriver( sourceData, selectorMap )(({
-					streamChannel: channel
+					streamChannel: store
 				}) => {
-					expect( channel.data ).toEqual({
+					expect( store.data ).toEqual({
 						all: sourceData,
 						isActive: sourceData.isActive,
 						tag6: sourceData.tags[ 5 ],
@@ -205,8 +204,8 @@ describe( 'Context', () => {
 					FULL_STATE_SELECTOR, 
 					'tags',
 					'history.places[2].country'
-				])(({ streamChannel: channel }) => {
-					expect( channel.data ).toEqual({
+				])(({ streamChannel: store }) => {
+					expect( store.data ).toEqual({
 						0: sourceData.history.places[ 2 ].year,
 						1: sourceData.isActive,
 						2: sourceData.tags[ 5 ],
@@ -218,8 +217,8 @@ describe( 'Context', () => {
 			} );
 			test( 'omitting selectorMap produces empty data property', () => {
 				mountDriver( sourceData )(({
-					streamChannel: channel
-				}) => expect( channel.data ).toEqual({}));
+					streamChannel: store
+				}) => expect( store.data ).toEqual({}));
 			} );
 			describe( 'selectorMap update', () => {
 				const selectorMapOnRender =  {
@@ -234,11 +233,11 @@ describe( 'Context', () => {
 				describe( 'normal flow', () => {
 					test( 'adjusts the store on selctorMap change', () => {
 						mountDriver( createSourceData(), selectorMapOnRender )(
-							({ streamChannel: channel }) => {
-								expect( Object.keys( channel.data ) )
+							({ streamChannel: store }) => {
+								expect( Object.keys( store.data ) )
 									.toEqual( Object.keys( selectorMapOnRender ));
-								channel.selectorMap = selectorMapOnRerender;
-								expect( Object.keys( channel.data ) )
+								store.selectorMap = selectorMapOnRerender;
+								expect( Object.keys( store.data ) )
 									.toEqual( Object.keys( selectorMapOnRerender ));
 							}
 						);
@@ -246,10 +245,10 @@ describe( 'Context', () => {
 					describe( 'when the new selectorMap is not empty', () => {
 						test( 'refreshes state data', () => {
 							mountDriver( createSourceData() )(
-								({ streamChannel: channel }) => {
-									expect( channel.data ).toEqual({});
-									channel.selectorMap = selectorMapOnRerender;
-									expect( Object.keys( channel.data ) )
+								({ streamChannel: store }) => {
+									expect( store.data ).toEqual({});
+									store.selectorMap = selectorMapOnRerender;
+									expect( Object.keys( store.data ) )
 										.toEqual( Object.keys( selectorMapOnRerender ) );
 								}
 							);
@@ -260,31 +259,31 @@ describe( 'Context', () => {
 					describe( 'and existing data is not empty', () => {
 						test( 'adjusts the store on selctorMap change', () => {
 							mountDriver( createSourceData(), selectorMapOnRender )(
-								({ streamChannel: channel }) => {
-									expect( Object.keys( channel.data ) )
+								({ streamChannel: store }) => {
+									expect( Object.keys( store.data ) )
 										.toEqual( Object.keys( selectorMapOnRender ));
-									channel.selectorMap = undefined as unknown as typeof selectorMapOnRender;
-									expect( channel.data ).toEqual({});
+									store.selectorMap = undefined as unknown as typeof selectorMapOnRender;
+									expect( store.data ).toEqual({});
 								}
 							);
 						} );
 						test( 'refreshes state data with empty object', async () => {
 							mountDriver( undefined, selectorMapOnRender )(
-								({ streamChannel: channel }) => {
-									expect( Object.keys( channel.data ) )
+								({ streamChannel: store }) => {
+									expect( Object.keys( store.data ) )
 										.toEqual( Object.keys( selectorMapOnRender ) );
-									channel.selectorMap = undefined as unknown as typeof selectorMap;
-									expect( channel.data ).toEqual({});
+									store.selectorMap = undefined as unknown as typeof selectorMap;
+									expect( store.data ).toEqual({});
 								}
 							);
 						} );
 					} );
 					describe( 'and existing data is empty', () => {
 						test( 'leaves the store as-is on selctorMap change', async () => {
-							mountDriver()(({ streamChannel: channel }) => {
-								expect( channel.data ).toEqual({});
-								channel.selectorMap = {};
-								expect( channel.data ).toEqual({});
+							mountDriver()(({ streamChannel: store }) => {
+								expect( store.data ).toEqual({});
+								store.selectorMap = {};
+								expect( store.data ).toEqual({});
 							});
 						} );
 					} );
@@ -299,26 +298,26 @@ describe( 'Context', () => {
 						myAge: 'age'
 					} as const )(({
 						context: ctx,
-						streamChannel: channel
+						streamChannel: store
 					}) => {
-						expect( channel.data ).toEqual({
+						expect( store.data ).toEqual({
 							country3: defaultState.history.places[ 2 ].country,
 							isActive: defaultState.isActive,
 							myAge: defaultState.age
 						});
 						// while writeable, reactive property changes do not affect application state
 						// @ts-expect-error
-						channel.data.myAge = 51;
-						expect( channel.data ).toEqual({
+						store.data.myAge = 51;
+						expect( store.data ).toEqual({
 							country3: defaultState.history.places[ 2 ].country,
 							isActive: defaultState.isActive,
 							myAge: 51
 						});
 						expect( ctx.store.getState().age ).toBe( defaultState.age );
-						expect( channel.data.myAge ).not.toEqual( defaultState.age );
-						// must use stream's `channel.setState` or `context.store.setState` to update application state
-						channel.setState({ age: channel.data.myAge } as Changes<SourceData> );
-						expect( channel.data.myAge ).toBe( 51 );
+						expect( store.data.myAge ).not.toEqual( defaultState.age );
+						// must use stream's `store.setState` or `context.store.setState` to update application state
+						store.setState({ age: store.data.myAge } as Changes<SourceData> );
+						expect( store.data.myAge ).toBe( 51 );
 						expect( ctx.store.getState().age ).toBe( 51 );
 					});
 				} );
@@ -332,7 +331,7 @@ describe( 'Context', () => {
 						tag6: 'tags[5]',
 						tag7: 'tags[6]',
 						tags: 'tags'
-					} as const )(({ streamChannel: channel}) => {
+					} as const )(({ streamChannel: store}) => {
 						const expectedValue = {
 							city3: defaultState.history.places[ 2 ].city,
 							country3: defaultState.history.places[ 2 ].country,
@@ -343,8 +342,8 @@ describe( 'Context', () => {
 							tag7: defaultState.tags[ 6 ],
 							tags: defaultState.tags
 						};
-						expect( channel.data ).toEqual( expectedValue )
-						channel.setState({
+						expect( store.data ).toEqual( expectedValue )
+						store.setState({
 							friends: { [ AutoImmutableModule.MOVE_TAG ]: [ -1, 1 ] },
 							isActive: true,
 							history: {
@@ -357,7 +356,7 @@ describe( 'Context', () => {
 							},
 							tags: { [ AutoImmutableModule.DELETE_TAG ]: [ 3, 5 ] }
 						} as unknown as SourceData );
-						expect( channel.data ).toEqual({
+						expect( store.data ).toEqual({
 							...expectedValue,
 							city3: 'Marakesh',
 							country3: 'Morocco',
@@ -378,7 +377,7 @@ describe( 'Context', () => {
 						tag6: 'tags[5]',
 						tag7: 'tags[6]',
 						state: FULL_STATE_SELECTOR
-					} as const )(({ streamChannel: channel }) => {
+					} as const )(({ streamChannel: store }) => {
 						const expectedValue = {
 							city3: defaultState.history.places[ 2 ].city,
 							country3: defaultState.history.places[ 2 ].country,
@@ -388,8 +387,8 @@ describe( 'Context', () => {
 							tag7: defaultState.tags[ 6 ],
 							state: defaultState
 						};
-						expect( channel.data ).toEqual( expectedValue );
-						channel.setState({
+						expect( store.data ).toEqual( expectedValue );
+						store.setState({
 							isActive: true,
 							history: {
 								places: {
@@ -404,7 +403,7 @@ describe( 'Context', () => {
 						updatedDataEquiv.history.places[ 2 ].city = 'Marakesh';
 						updatedDataEquiv.history.places[ 2 ].country = 'Morocco';
 						updatedDataEquiv.isActive = true;
-						expect( channel.data ).toEqual({
+						expect( store.data ).toEqual({
 							...expectedValue,
 							city3: updatedDataEquiv.history.places[ 2 ].city,
 							country3: updatedDataEquiv.history.places[ 2 ].country,
@@ -415,9 +414,9 @@ describe( 'Context', () => {
 				} );
 				test( 'holds an empty object when no renderKeys provided ', async () => {
 					mountDriver( createSourceData() )(
-						({ streamChannel: channel }) => {
-							expect( channel.data ).toEqual({});
-							channel.setState({ // can still update state
+						({ streamChannel: store }) => {
+							expect( store.data ).toEqual({});
+							store.setState({ // can still update state
 								isActive: true,
 								history: {
 									places: {
@@ -428,7 +427,7 @@ describe( 'Context', () => {
 									}
 								}
 							} as unknown as SourceData );
-							expect( channel.data ).toEqual({});
+							expect( store.data ).toEqual({});
 						}
 					);
 				} );
@@ -444,7 +443,7 @@ describe( 'Context', () => {
 								tag6: 'tags[5]'
 							} as const )(({
 								context: ctx,
-								streamChannel: channel
+								streamChannel: store
 							}) => {
 								const isActive2 = !sourceData.isActive;
 								ctx.store.setState({
@@ -452,7 +451,7 @@ describe( 'Context', () => {
 									isActive: isActive2,
 									tags: { 5: 'JUST-TESTING' }
 								} as unknown as SourceData );
-								expect( channel.data ).toEqual({
+								expect( store.data ).toEqual({
 									year3: '3035',
 									isActive: isActive2,
 									tag6: 'JUST-TESTING'
@@ -471,8 +470,8 @@ describe( 'Context', () => {
 										return tags;
 									})()
 								});
-								channel.resetState( args );
-								expect( channel.data ).toEqual({
+								store.resetState( args );
+								expect( store.data ).toEqual({
 									year3: sourceData.history.places[2].year,
 									isActive: isActive2,
 									tag6: sourceData.tags[ 5 ]
@@ -490,16 +489,16 @@ describe( 'Context', () => {
 							const args = [ 'blatant', 'company', 'xylophone', 'yodellers', 'zenith' ];
 							mountDriver( createSourceData() )(({
 								context: ctx,
-								streamChannel: channel
+								streamChannel: store
 							}) => {
-								expect( channel.data ).toEqual({});
+								expect( store.data ).toEqual({});
 								ctx.store.setState({
 									blatant: true,
 									company: 'SOME NEW TEST INC.',
 									xylophone: 'Ruggedly melodic', 
 									yodellers: 'Cartoonishly joyful'
 								} as unknown as SourceData );
-								expect( channel.data ).toEqual({});
+								expect( store.data ).toEqual({});
 								expect( ctx.store.getState() ).toEqual({
 									...sourceData,
 									blatant: true,
@@ -507,8 +506,8 @@ describe( 'Context', () => {
 									xylophone: 'Ruggedly melodic', 
 									yodellers: 'Cartoonishly joyful'
 								});
-								channel.resetState( args );
-								expect( channel.data ).toEqual({});
+								store.resetState( args );
+								expect( store.data ).toEqual({});
 								expect( ctx.store.getState() ).toEqual( sourceData );
 							});
 						} );
@@ -517,16 +516,16 @@ describe( 'Context', () => {
 						test( 'results in no-op', async () => {
 							mountDriver( createSourceData() )(({
 								context: ctx,
-								streamChannel: channel
+								streamChannel: store
 							}) => {
-								expect( channel.data ).toEqual({});
+								expect( store.data ).toEqual({});
 								ctx.store.setState({
 									blatant: true,
 									company: 'SOME NEW TEST INC.',
 									xylophone: 'Ruggedly melodic', 
 									yodellers: 'Cartoonishly joyful'
 								} as unknown as SourceData );
-								expect( channel.data ).toEqual({});
+								expect( store.data ).toEqual({});
 								const alteredState = ctx.store.getState();
 								expect( alteredState ).toEqual({
 									...sourceData,
@@ -535,8 +534,8 @@ describe( 'Context', () => {
 									xylophone: 'Ruggedly melodic', 
 									yodellers: 'Cartoonishly joyful'
 								});
-								channel.resetState();
-								expect( channel.data ).toEqual({});
+								store.resetState();
+								expect( store.data ).toEqual({});
 								expect( ctx.store.getState() ).toBe( alteredState );
 							});
 						} );
@@ -740,7 +739,7 @@ function mountDriver<
 >( initData? : T, selctorMap? : S, prehooks? : Prehooks<T>, storage? : IStorage<T> ) {
 	const artefact = {} as {
 		context : VueEagleEye<T>;
-		streamChannel : Channel<T, S>;
+		streamChannel : Store<T, S>;
 	};
     const Driver = {
     	setup() {
