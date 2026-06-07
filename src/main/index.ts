@@ -9,7 +9,7 @@ import {
 	createEagleEye
 } from '@webkrafters/eagleeye';
 
-import { onUnmounted, reactive } from 'vue';
+import { onBeforeUnmount, reactive } from 'vue';
 
 import {
 	AutoImmutable,
@@ -28,13 +28,13 @@ export class Channel<
 	private _data = reactive({}) as Data<S, T>;
 	constructor( stream : BaseStream<T>, selectorMap : S ) {
 		this._channel = stream( selectorMap ) as BaseChannel<T, S>;
-		const observe = () => this.updateData();
-		this._channel.addListener( 'data-changed', observe );
-		onUnmounted(() => {
-			this._channel.removeListener( 'data-changed', observe );
+		const sync = () => this.updateData();
+		this._channel.addListener( 'data-changed', sync );
+		onBeforeUnmount(() => {
+			this._channel.removeListener( 'data-changed', sync );
 			this._channel.endStream();
 		});
-		observe();
+	 	sync();
 	}
 	get data() { return this._data }
 	set selectorMap( selectorMap : S ) {
