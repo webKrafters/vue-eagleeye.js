@@ -29,7 +29,7 @@
 </table>
 <ul>
 	<li> Ready for use anywhere in the app.</li>
-	<li> Auto-immutable update-friendly context. See <a href="https://vue-eagleeye.js.org/concepts//setstate"><code>.setState</code></a>.</li>
+	<li> Auto-immutable update-friendly context. See <a href="https://vue-eagleeye.js.org/concepts//setstate"><code>store.setState</code></a>.</li>
 	<li> A context bearing an observable consumer <a href="https://vue-eagleeye.js.org/concepts/store">store</a>.</li>
 	<li> Recognizes <b>negative array indexing</b>. Please see <a href="https://vue-eagleeye.js.org/concepts/property-path">Property Path</a> and <code>store.setState</code> <a href="https://vue-eagleeye.js.org/concepts/store/setstate#indexing">Indexing</a>.</li>
 	<li> Only re-renders subscribing components (<a href="https://vue-eagleeye.js.org/concepts/client">clients</a>) on context state changes.</li>
