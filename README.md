@@ -24,7 +24,7 @@
 
 <table BORDER-COLOR="0a0" BORDER-WIDTH="2">
     <td VALIGN="middle" ALIGN="center" FONT-WEIGHT="BOLD" COLOR="#333" HEIGHT="250px" width="1250px">
-		COMPATIBLE WITH VUE VERSION 2.3.0 AND BEYOND.<br />
+		COMPATIBLE WITH VUE VERSION 3.0 AND BEYOND.<br />
 	</td>
 </table>
 <ul>
