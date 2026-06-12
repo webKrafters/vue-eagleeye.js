@@ -21,6 +21,6 @@ jobs:
       - run: npm cache clean --force
       - run: npm install --legacy-peer-deps
       - run: npm run build
-      - run: npm publish --tag beta --access public
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_RELEASE_CLI_0 }}
