@@ -45,7 +45,7 @@
 If sandbox fails to load app, please refresh dependencies on its lower left.
 <p>If the problem persits, </p>
 <ol>
-	<li>clone the demo app <a href="https://github.com/webKrafters/ng-eagleeye-app" rel="no-follow">repository</a>.</li>
+	<li>clone the demo app <a href="https://github.com/webKrafters/vue-eagleeye-app" rel="no-follow">repository</a>.</li>
 	<li>CD to the cloned demo app project's root folder.</li>
 	<li>run `npm i`</li>
 	<li>run `npm i -S <pkg_name>` for all the packages in this `peerDependencies` of this library's package.json object.</li>
