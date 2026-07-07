@@ -113,7 +113,7 @@
     "test:watch": "eslint --fix && jest --updateSnapshot --watchAll"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": {
     "@webkrafters/eagleeye": "^1.0.8"
   }
